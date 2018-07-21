@@ -4,7 +4,9 @@ using UnityEngine;
 
 
 
-public class GrapplingHookMovementCtrler : MonoBehaviour {
+public class OrbitThing : MonoBehaviour { 
+
+
 
     public Rigidbody2D GrappleBody;
     public GameObject Grapplehook;
@@ -21,50 +23,50 @@ public class GrapplingHookMovementCtrler : MonoBehaviour {
 
     private void Start()
     {
-        Grapplehook = GameObject.Find("Grapplehook");
+     //   Grapplehook = GameObject.Find("Grapplehook");
         GrappleBody = GetComponent<Rigidbody2D>();
-        Player = GameObject.Find("Player");
+       // Player = GameObject.Find("Player");
 
     }
 
-    private void FindPosition() {
+    private void FindPosition()
+    {
         Vector3 Grap = Grapplehook.transform.position;
         Vector3 plyr = Player.transform.position;
         PositionDifference = Vector3.Distance(Grap, plyr);
     }
     private void BackToPlayer()
     {
-        transform.position = Vector2.MoveTowards(transform.position, Player.transform.position, 3f * Time.deltaTime);
-        //float GrapX = Grapplehook.transform.position.x;
-        //float GrapY = Grapplehook.transform.position.y;
-        //float PlyrX = Player.transform.position.x;
-        //float PlyrY = Player.transform.position.y;
-        //if (GrapX < PlyrX) //if plyrX < grapX then grapplehook is to the right of player
-        //{
-        //    if (GrapY < PlyrY)
-        //    {
-        //        //in this block Grapplehook is to the Left and below Player
-        //        GrappleBody.AddForce(new Vector3(GrappleForceX, GrappleForceY, 0f));
-        //    }
-        //    if (GrapY > PlyrY)
-        //    {
-        //        //in this block Grapplehook is to the Left and above Player
-        //        GrappleBody.AddForce(new Vector3(GrappleForceX, -GrappleForceY, 0f));
-        //    }
-        //}
-        //if (GrapX > PlyrX)
-        //{
-        //    if (GrapY < PlyrY)
-        //    {
-        //        //in this block Grapplehook is to the Right and below Player
-        //        GrappleBody.AddForce(new Vector3(-GrappleForceX, GrappleForceY, 0f));
-        //    }
-        //    if (GrapY > PlyrY)
-        //    {
-        //        //in this block Grapplehook is to the Right and above Player
-        //        GrappleBody.AddForce(new Vector3(-GrappleForceX, -GrappleForceY, 0f));
-        //    }
-        //}
+        float GrapX = Grapplehook.transform.position.x;
+        float GrapY = Grapplehook.transform.position.y;
+        float PlyrX = Player.transform.position.x;
+        float PlyrY = Player.transform.position.y;
+        if (GrapX < PlyrX) //if plyrX < grapX then grapplehook is to the right of player
+        {
+            if (GrapY < PlyrY)
+            {
+                //in this block Grapplehook is to the Left and below Player
+                GrappleBody.AddForce(new Vector3(GrappleForceX, GrappleForceY, 0f));
+            }
+            if (GrapY > PlyrY)
+            {
+                //in this block Grapplehook is to the Left and above Player
+                GrappleBody.AddForce(new Vector3(GrappleForceX, -GrappleForceY, 0f));
+            }
+        }
+        if (GrapX > PlyrX)
+        {
+            if (GrapY < PlyrY)
+            {
+                //in this block Grapplehook is to the Right and below Player
+                GrappleBody.AddForce(new Vector3(-GrappleForceX, GrappleForceY, 0f));
+            }
+            if (GrapY > PlyrY)
+            {
+                //in this block Grapplehook is to the Right and above Player
+                GrappleBody.AddForce(new Vector3(-GrappleForceX, -GrappleForceY, 0f));
+            }
+        }
     }
 
     private void FixedUpdate()
@@ -73,12 +75,12 @@ public class GrapplingHookMovementCtrler : MonoBehaviour {
         Origin = Player.transform;
         if (Input.GetButtonDown("Grapple") && PositionDifference < RopeDistance) //"throws" the grapplehook. only one direction currently.
         {
-            
-            Debug.Log(GrappleForceX);
-            GrappleBody.AddForce(new Vector2(GrappleForceX, GrappleForceY));
+            GrappleForceX = 10f;
+            GrappleForceY = 9f;
+            GrappleBody.AddForce(new Vector3(GrappleForceX, GrappleForceY, 0f));
             GrappleBody.drag = GHslow;
         }
-        if  (PositionDifference >= RopeDistance || Grapplehook.transform.position != Origin.position)
+        if (PositionDifference >= RopeDistance || Grapplehook.transform.position != Origin.position)
         {
 
             BackToPlayer();
@@ -89,19 +91,20 @@ public class GrapplingHookMovementCtrler : MonoBehaviour {
             //Move Grapplehook to Player X & Y
         }
         //if (PositionDifference < 1.5f && Grapplehook.transform.position != Origin.position) {
-            
+
         //}
         //else
         //{
         //    GrappleForceX = 10f;
         //    GrappleForceY = 9f;
         //}
-        
-    } 
-    // Update is called once per frame
-    void Update () {
 
-        
+    }
+    // Update is called once per frame
+    void Update()
+    {
+
+
 
         /*what I need to do, in psudo-code:
          when(buttonpressed) {
@@ -113,4 +116,4 @@ public class GrapplingHookMovementCtrler : MonoBehaviour {
     }
 }
 
-     
+
