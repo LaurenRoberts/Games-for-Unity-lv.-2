@@ -12,14 +12,15 @@ public class GrapplingHookMovementCtrler : MonoBehaviour {
     private Transform Origin;
     private float DeltaMove;
     private float PositionDifference;
-    public float GrappleForceX = 10f;
-    public float GrappleForceY = 9f;
+    public float GrappleForceX = 1000f;
+    public float GrappleForceY = 900f;
     public float GHslow = 5f;
     public float RopeDistance = 5f;
     private float AcceptableDist = .3f;
     private bool thrown;
     private bool returning;
-    
+    private float pullBackSpeed = 3f;
+    private bool ActivePull = false;
 
 
     private void Start()
@@ -30,6 +31,18 @@ public class GrapplingHookMovementCtrler : MonoBehaviour {
 
     }
 
+    private void Direction()
+    {
+        if (Input.GetButton("MoveRight") == true || Input.GetButton("right") == true)
+        {
+            GrappleForceX = 1000f;
+        }
+        if (Input.GetButton("MoveLeft") == true || Input.GetButton("left") == true)
+        {
+            GrappleForceX = -1000f;
+        }
+
+    }
     private void FindPosition() {
         Vector3 Grap = Grapplehook.transform.position;
         Vector3 plyr = Player.transform.position;
@@ -39,20 +52,25 @@ public class GrapplingHookMovementCtrler : MonoBehaviour {
     {
         if (PositionDifference >= RopeDistance)
         {
+
             if (PositionDifference >= RopeDistance + 2f)
             { //this code will run if PositionDifference is bigger than RopeDistance by an excessive amount. Should be faster than diffault
-                transform.position = Vector2.MoveTowards(transform.position, Player.transform.position, 8f * Time.deltaTime);
+                pullBackSpeed = 8f;
             }
             else
             { //this code will run if PositionDifference is bigger than RopeDistance but not by an excessive amount. should be faster than diffault
-                transform.position = Vector2.MoveTowards(transform.position, Player.transform.position, 5f * Time.deltaTime);
+                pullBackSpeed = 5f;
             }
         }
         else
         { //this will run if PositionDifference is NOT greater than RopeDistance. It should be set to what you had as the diffault before.
-            transform.position = Vector2.MoveTowards(transform.position, Player.transform.position, 3f * Time.deltaTime);
+            pullBackSpeed = 3f;
+        }
+        if (ActivePull == true) {
+            pullBackSpeed = 16f;
         }
 
+        transform.position = Vector2.MoveTowards(transform.position, Player.transform.position, pullBackSpeed * Time.deltaTime);
 
         if (false)//wanted all this to be collapsable.
         {
@@ -88,18 +106,19 @@ public class GrapplingHookMovementCtrler : MonoBehaviour {
             //}
         }
     }
-
     private void CheckThrown()
     {
         if (thrown == true && PositionDifference <= AcceptableDist /*&& GrappleBody.velocity.x <= m && GrappleBody.velocity.y <= m*/)
         {
         thrown = false;
+            ActivePull = false;
         }
     }
  
     private void FixedUpdate()
     {
         FindPosition();
+        Direction();
         Origin = Player.transform;
    //     Debug.Log("" + GrappleBody.velocity);
         if (Input.GetButtonDown("Grapple") && PositionDifference < RopeDistance) //"throws" the grapplehook. only one direction currently.
@@ -115,6 +134,7 @@ public class GrapplingHookMovementCtrler : MonoBehaviour {
         if  (PositionDifference >= RopeDistance || Grapplehook.transform.position != Player.transform.position)
         {
             BackToPlayer();
+            
             //add code to check if grapplehook is with player. this might be a bit weird until that
             //GrappleBody.AddForce(new Vector3(-GrappleForceX, -GrappleForceY, 0f));
             //(code)find fastest course to player and add force in that direction
@@ -123,10 +143,10 @@ public class GrapplingHookMovementCtrler : MonoBehaviour {
         }
         if (thrown == false)
         {
-            Grapplehook.transform.position = Player.transform.position;
-        }
+            Grapplehook.transform.position = Player.transform.position; }
 
-        
+
+
     }
     // Update is called once per frame
     void Update() {
@@ -135,7 +155,11 @@ public class GrapplingHookMovementCtrler : MonoBehaviour {
         }
         if ( returning == true ) { 
         CheckThrown();
-    }
+            if (Input.GetButtonDown("down") == true)
+            {
+                ActivePull = true;
+            }
+        }
 
 
         /*what I need to do, in psudo-code:
