@@ -9,6 +9,7 @@ public class GrapplingHookMovementCtrler : MonoBehaviour {
     public Rigidbody2D GrappleBody;
     public GameObject Grapplehook;
     public GameObject Player;
+    private Rigidbody2D PlayerBody;
     private Transform Origin;
     private float DeltaMove;
     private float PositionDifference;
@@ -28,11 +29,13 @@ public class GrapplingHookMovementCtrler : MonoBehaviour {
         Grapplehook = GameObject.Find("Grapplehook");
         GrappleBody = GetComponent<Rigidbody2D>();
         Player = GameObject.Find("Player");
+        PlayerBody = Player.GetComponent<Rigidbody2D>();
 
     }
 
     private void Direction()
     {
+        //receves input to tell the grappling hook where to go. Will probably be replaced with a better system in the future.
         if (Input.GetButton("MoveRight") == true || Input.GetButton("right") == true)
         {
             GrappleForceX = 1000f;
@@ -52,78 +55,37 @@ public class GrapplingHookMovementCtrler : MonoBehaviour {
     {
         if (PositionDifference >= RopeDistance)
         {
-
-            if (PositionDifference >= RopeDistance + 2f)
-            { //this code will run if PositionDifference is bigger than RopeDistance by an excessive amount. Should be faster than diffault
-                pullBackSpeed = 8f;
-            }
-            else
-            { //this code will run if PositionDifference is bigger than RopeDistance but not by an excessive amount. should be faster than diffault
-                pullBackSpeed = 5f;
-            }
+             //this code will run if PositionDifference is bigger than RopeDistance
+                pullBackSpeed = 7f;
         }
         else
         { //this will run if PositionDifference is NOT greater than RopeDistance. It should be set to what you had as the diffault before.
-            pullBackSpeed = 3f;
+            pullBackSpeed = 5f;
         }
         if (ActivePull == true) {
             pullBackSpeed = 16f;
         }
-
         transform.position = Vector2.MoveTowards(transform.position, Player.transform.position, pullBackSpeed * Time.deltaTime);
-
-        if (false)//wanted all this to be collapsable.
-        {
-            //float GrapX = Grapplehook.transform.position.x;
-            //float GrapY = Grapplehook.transform.position.y;
-            //float PlyrX = Player.transform.position.x;
-            //float PlyrY = Player.transform.position.y;
-            //if (GrapX < PlyrX) //if plyrX < grapX then grapplehook is to the right of player
-            //{
-            //    if (GrapY < PlyrY)
-            //    {
-            //        //in this block Grapplehook is to the Left and below Player
-            //        GrappleBody.AddForce(new Vector3(GrappleForceX, GrappleForceY, 0f));
-            //    }
-            //    if (GrapY > PlyrY)
-            //    {
-            //        //in this block Grapplehook is to the Left and above Player
-            //        GrappleBody.AddForce(new Vector3(GrappleForceX, -GrappleForceY, 0f));
-            //    }
-            //}
-            //if (GrapX > PlyrX)
-            //{
-            //    if (GrapY < PlyrY)
-            //    {
-            //        //in this block Grapplehook is to the Right and below Player
-            //        GrappleBody.AddForce(new Vector3(-GrappleForceX, GrappleForceY, 0f));
-            //    }
-            //    if (GrapY > PlyrY)
-            //    {
-            //        //in this block Grapplehook is to the Right and above Player
-            //        GrappleBody.AddForce(new Vector3(-GrappleForceX, -GrappleForceY, 0f));
-            //    }
-            //}
-        }
     }
     private void CheckThrown()
     {
         if (thrown == true && PositionDifference <= AcceptableDist /*&& GrappleBody.velocity.x <= m && GrappleBody.velocity.y <= m*/)
         {
         thrown = false;
-            ActivePull = false;
+        ActivePull = false;
         }
     }
- 
+
     private void FixedUpdate()
     {
         FindPosition();
         Direction();
         Origin = Player.transform;
    //     Debug.Log("" + GrappleBody.velocity);
-        if (Input.GetButtonDown("Grapple") && PositionDifference < RopeDistance) //"throws" the grapplehook. only one direction currently.
+        if (Input.GetButtonDown("Grapple") && PositionDifference < AcceptableDist)
         {
-            
+         //"throws" the grapplehook. 
+
             //Debug.Log(GrappleForceX);
             GrappleBody.AddForce(new Vector2(GrappleForceX, GrappleForceY));
             GrappleBody.drag = GHslow;
@@ -131,7 +93,7 @@ public class GrapplingHookMovementCtrler : MonoBehaviour {
             returning = false;
 
         }
-        if  (PositionDifference >= RopeDistance || Grapplehook.transform.position != Player.transform.position)
+        if  (PositionDifference >= RopeDistance || PositionDifference >= AcceptableDist)
         {
             BackToPlayer();
             
@@ -141,35 +103,51 @@ public class GrapplingHookMovementCtrler : MonoBehaviour {
             //  GrappleBody.MovePosition(Player.transform.position);
             //Move Grapplehook to Player X & Y
         }
-        if (thrown == false)
-        {
-            Grapplehook.transform.position = Player.transform.position; }
-
-
-
+        
     }
+
     // Update is called once per frame
     void Update() {
+        if (thrown == false)
+        {
+            Grapplehook.transform.position = Player.transform.position;
+        }
         if (PositionDifference >= AcceptableDist) {
             returning = true;
         }
-        if ( returning == true ) { 
-        CheckThrown();
+        if (returning == true) {
+            CheckThrown();
             if (Input.GetButtonDown("down") == true)
             {
                 ActivePull = true;
             }
         }
+        if (thrown == true)
+        {
+            float Speed = .1f;
+            float RunSpeed = .02f;
+            if (Input.GetButton("MoveRight") == true)
+            {
+                transform.position += new Vector3(Speed, 0f, 0f);
+            }
+            if (Input.GetButton("MoveLeft") == true)
+            {
+                transform.position += new Vector3(-Speed, 0f, 0f);
+            }
+            if (Input.GetButton("Run") == true && Speed <= .15f)
+            {
+                Speed = Speed + RunSpeed;
+            }
+            else
+            {
+                if (Speed > .1f)
+                {
+                    Speed = Mathf.Max(Speed - .01f * Time.deltaTime, .1f);
+                }
 
+            }
 
-        /*what I need to do, in psudo-code:
-         when(buttonpressed) {
-         grapplehook goes to place. 
         }
-        if(runs into interactable thing){
-       Stop + bring [player] to collision area 
-        }else{go back to player}*/
     }
-}
 
-     
+}

@@ -10,10 +10,12 @@ public class PlayerMovementController : MonoBehaviour
     public float Slow = .01f;
     public float RunSpeed = .02f;
     public Rigidbody2D RigidBody;
+    private bool TouchGround;
 
     // Update is called once per frame
     void Update()
     {
+
         if (Input.GetButton("MoveRight") == true)
         {
             //Moves (the player) right
@@ -26,8 +28,9 @@ public class PlayerMovementController : MonoBehaviour
             transform.position += new Vector3(-Speed, 0f, 0f);
         }
 
-        if (Input.GetButtonDown("Jump") == true)
+        if (Input.GetButtonDown("Jump") == true && TouchGround == true)
         {
+            //Jump jump
             RigidBody.AddForce(new Vector3(0f, JumpForce, 0f));
         }
 
@@ -45,4 +48,33 @@ public class PlayerMovementController : MonoBehaviour
         }
 
     }
+
+    //private void OnColliderEnter(Collider collision)
+    //{
+    //    if (collision.tag == "Ground")
+    //    {
+    //        Debug.Log("this is Ground");
+    //    }
+    //couldn't get this to work. Used an extra box collider instead
+    //}
+    private void OnTriggerEnter2D(Collider2D collision) 
+    {
+        if (collision.tag == "Ground")
+        {
+//            Debug.Log("Dirt");
+            TouchGround = true;
+        }
+    }
+    //these two are here as a ground check. Is there a better way to do it? probably. but this works fine for my purposes atm.
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.tag == "Ground")
+        {
+//            Debug.Log("not Dirt");
+            TouchGround = false;
+        }
+    }
+
+
+
 }
